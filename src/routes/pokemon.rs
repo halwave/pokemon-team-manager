@@ -1,17 +1,21 @@
 use axum::{
     Json,
-    extract::{Path, State},
-    http::StatusCode,
+    extract::{Path, State, rejection::PathRejection},
 };
 
-use crate::{domain::Pokemon, pokemon_catalog::PokemonCatalog};
+use super::AppState;
+use crate::{domain::Pokemon, error::AppError};
 
 pub async fn get_pokemon(
-    State(catalog): State<PokemonCatalog>,
-    Path(id): Path<u32>,
-) -> Result<Json<Pokemon>, StatusCode> {
-    match catalog.find(id) {
-        Some(pokemon) => Ok(Json(pokemon.clone())),
-        None => Err(StatusCode::NOT_FOUND),
-    }
+    State(state): State<AppState>,
+    path: Result<Path<u32>, PathRejection>,
+) -> Result<Json<Pokemon>, AppError> {
+    let Path(id) = path?;
+    let pokemon = state
+        .pokemon_catalog
+        .find(id)
+        .cloned()
+        .ok_or(AppError::PokemonNotFound(id))?;
+
+    Ok(Json(pokemon))
 }

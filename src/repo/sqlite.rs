@@ -136,4 +136,35 @@ mod tests {
 
         assert_eq!(repository.load_team().await.unwrap(), team);
     }
+
+    #[tokio::test]
+    async fn team_data_survives_reopening_the_database() {
+        let unique_id = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "pokemon-team-manager-{}-{unique_id}.db",
+            std::process::id()
+        ));
+
+        let mut team = Team::new();
+        team.add_pokemon(Pokemon {
+            id: 25,
+            name: "Sample Creature 025".to_owned(),
+        })
+        .unwrap();
+
+        let repository = SqliteTeamRepository::connect(&path).await.unwrap();
+        repository.save_team(&team).await.unwrap();
+        repository.pool.close().await;
+        drop(repository);
+
+        let repository = SqliteTeamRepository::connect(&path).await.unwrap();
+        assert_eq!(repository.load_team().await.unwrap(), team);
+        repository.pool.close().await;
+        drop(repository);
+
+        std::fs::remove_file(path).unwrap();
+    }
 }
