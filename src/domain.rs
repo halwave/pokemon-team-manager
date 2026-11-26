@@ -27,6 +27,12 @@ impl Team {
         }
     }
 
+    pub fn from_slots(slots: [Option<Pokemon>; TEAM_SIZE]) -> Self {
+        Self {
+            slots: Vec::from(slots),
+        }
+    }
+
     pub fn add_pokemon(&mut self, pokemon: Pokemon) -> Result<usize, TeamError> {
         for index in 0..TEAM_SIZE {
             if self.slots[index].is_none() {
