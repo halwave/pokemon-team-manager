@@ -1,7 +1,6 @@
 # Pokémon Team Manager
 
-A Rust backend API for authenticated users to manage a single Pokémon team of
-up to six Pokémon.
+A Rust backend API for managing one Pokémon team of up to six Pokémon.
 
 ## Getting started
 

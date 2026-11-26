@@ -2,15 +2,15 @@
 
 ## 1. Overview & Goals
 
-A lightweight, long-running backend JSON REST API written in Rust that allows authenticated users to manage their single Pokémon team, persisted in SQLite, while isolating storage behind a repository boundary.
+A lightweight, long-running backend JSON REST API written in Rust for managing one Pokémon team, persisted in SQLite, while isolating storage behind a repository boundary.
 
 ### Goals
 
-- Provide a clean, predictable HTTP JSON API for authentication and team management.
-- Enforce domain invariants (e.g., team size limits, slot bounds, ownership checks) in core domain/service logic rather than HTTP handlers.
+- Provide a clean, predictable HTTP JSON API for team management.
+- Enforce domain invariants (e.g., team size limits and slot bounds) in core domain logic rather than HTTP handlers.
 - Keep database drivers and SQL dialects isolated behind repository traits so SQLite can be swapped or supplemented later (e.g., PostgreSQL) without rewriting handlers or domain rules.
 - Maintain clear separation of concerns, explicit error types, and straightforward testability.
-- Give each user one team with up to six slots. Slots have distinct identities and may reference the same Pokémon.
+- Manage one team with up to six slots. Slots have distinct identities and may reference the same Pokémon.
 - Represent Pokémon with a basic ID and name, selected from a small shared list.
 - Support adding a Pokémon to an empty slot, removing one, and replacing the Pokémon in an occupied slot.
 
@@ -18,7 +18,7 @@ A lightweight, long-running backend JSON REST API written in Rust that allows au
 
 - Complex battle simulation engines, damage calculators, or full Pokédex game-data scraping.
 - Distributed multi-node clustering, message queues, or microservices split.
-- OAuth2/OIDC providers, JWT refresh rotation, or role-based access control (RBAC) matrices.
+- User accounts and authentication.
 
 ---
 
@@ -29,8 +29,6 @@ A lightweight, long-running backend JSON REST API written in Rust that allows au
 - **Async Runtime:** `tokio` (`full` or `rt-multi-thread` + `macros`)
 - **Serialization:** `serde`, `serde_json`
 - **Database:** SQLite via `sqlx` (async, compile-time/query-checked) or `rusqlite` (synchronous, minimal overhead)
-- **Password Hashing:** `argon2` (or `bcrypt`)
-- **Token Generation:** `rand` / `uuid` (cryptographically random opaque session/bearer tokens)
 - **Error Handling:** `thiserror` (domain/app errors) and `anyhow` (startup/wiring if needed)
 
 ---
@@ -42,14 +40,12 @@ src/
   main.rs            # Loads config, initializes DB & repos, builds router, starts server
   config.rs          # Environment/config parsing (bind address, SQLite path/URL)
   error.rs           # Unified AppError enum + IntoResponse for JSON error payloads
-  domain.rs          # Core models (User, Team, TeamSlot, Pokemon) + domain rules/validation
-  auth.rs            # Login handler, password verification, opaque Bearer token extractor
+  domain.rs          # Team and Pokemon models; slot positions are numbered 1-6
   routes/
-    mod.rs           # Route composition and shared AppState definition
+    mod.rs           # Route composition
     health.rs        # GET /health endpoint
-    auth.rs          # POST /auth/login (and optional POST /auth/register)
     team.rs          # Team read and update handlers
   repo/
-    mod.rs           # Repository traits (UserRepository, SessionRepository, TeamRepository)
-    sqlite.rs        # SQLite implementations of the repository traits + migrations/init
+    mod.rs           # TeamRepository trait
+    sqlite.rs        # SQLite implementation and migrations/init
 ```

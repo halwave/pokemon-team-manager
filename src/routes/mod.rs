@@ -2,7 +2,6 @@
 
 use axum::{Router, routing::get};
 
-pub mod auth;
 pub mod health;
 pub mod team;
 
