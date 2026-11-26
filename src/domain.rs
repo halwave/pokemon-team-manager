@@ -2,7 +2,7 @@
 
 pub const TEAM_SIZE: usize = 6;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
 pub struct Pokemon {
     pub id: u32,
     pub name: String,

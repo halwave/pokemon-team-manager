@@ -11,7 +11,7 @@ A lightweight, long-running backend JSON REST API written in Rust for managing o
 - Keep database drivers and SQL dialects isolated behind repository traits so SQLite can be swapped or supplemented later (e.g., PostgreSQL) without rewriting handlers or domain rules.
 - Maintain clear separation of concerns, explicit error types, and straightforward testability.
 - Manage one team with up to six slots. Slots have distinct identities and may reference the same Pokémon.
-- Represent Pokémon with a basic ID and name, selected from a small shared list.
+- Use a local catalog of 151 Pokémon IDs and names to validate selections.
 - Support adding a Pokémon to an empty slot, removing one, and replacing the Pokémon in an occupied slot.
 
 ### Non-Goals (v1)
@@ -41,11 +41,15 @@ src/
   config.rs          # Environment/config parsing (bind address, SQLite path/URL)
   error.rs           # Unified AppError enum + IntoResponse for JSON error payloads
   domain.rs          # Team and Pokemon models; slot positions are numbered 1-6
+  pokemon_catalog.rs # Loads the local Pokémon catalog
   routes/
     mod.rs           # Route composition
     health.rs        # GET /health endpoint
+    pokemon.rs       # GET /pokemon/{id} lookup
     team.rs          # Team read and update handlers
   repo/
     mod.rs           # TeamRepository trait
     sqlite.rs        # SQLite implementation and migrations/init
+data/
+  pokemon.json       # Local catalog data
 ```

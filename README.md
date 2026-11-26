@@ -10,3 +10,14 @@ Requires a Rust toolchain. Check and test the project with:
 cargo check
 cargo test
 ```
+
+Run the API locally with:
+
+```text
+cargo run
+```
+
+The server listens at `http://127.0.0.1:3000`. Available endpoints:
+
+- `GET /health` checks that the API is running.
+- `GET /pokemon/{id}` looks up an entry in the local synthetic catalog (IDs 1–151).
